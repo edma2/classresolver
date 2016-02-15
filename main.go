@@ -10,7 +10,7 @@ import (
 
 func main() {
 	stop := make(chan bool)
-	paths := watch.Watch("/Users/ema/src/source/.pants.d/compile/zinc/", stop)
+	paths := watch.PathChanges("/Users/ema/src/source/.pants.d/compile/zinc/", stop)
 	go func() {
 		for p := range paths {
 			fmt.Println(p)

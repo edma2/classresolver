@@ -6,7 +6,7 @@ import (
 	"github.com/go-fsnotify/fsevents"
 )
 
-func Watch(path string, stop chan bool) chan string {
+func PathChanges(path string, stop chan bool) chan string {
 	es := &fsevents.EventStream{
 		Paths:   []string{path},
 		Latency: 500 * time.Millisecond,
