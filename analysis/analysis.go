@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"log"
 	"os"
 	"path"
 	"regexp"
@@ -19,6 +20,7 @@ var (
 )
 
 func ReadAnalysisFile(path string, emit func(string, string)) error {
+	log.Println("reading" + path)
 	return withReader(path, func(r *bufio.Reader) error {
 		if err := readUntil(r, "class names:"); err != nil {
 			return err
