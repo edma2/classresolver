@@ -21,11 +21,11 @@ func NewIndex() *Index {
 	}
 }
 
-func (idx *Index) Watch(root string) {
-	if err := readAnalysisFiles(idx, root); err != nil {
+func (idx *Index) Watch(path string) {
+	if err := readAnalysisFiles(idx, path); err != nil {
 		log.Fatal(err)
 	}
-	pathChanges := watch.PathChanges(root, idx.stop)
+	pathChanges := watch.PathChanges(path, idx.stop)
 	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
 	analysisChanges := watch.AnalysisChanges(analysisFileChanges)
 	go func() {
@@ -36,8 +36,8 @@ func (idx *Index) Watch(root string) {
 	}()
 }
 
-func readAnalysisFiles(idx *Index, root string) error {
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+func readAnalysisFiles(idx *Index, path string) error {
+	return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if analysis.IsAnalysisFile(path) {
 			return analysis.ReadAnalysisFile(path, func(class, path string) {
 				idx.m[class] = path
