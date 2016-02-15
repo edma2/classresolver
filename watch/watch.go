@@ -2,7 +2,6 @@ package watch
 
 import (
 	"log"
-	"strings"
 	"time"
 
 	"github.com/edma2/pantsindex/analysis"
@@ -41,7 +40,7 @@ func AnalysisFileChanges(pathChanges chan string) chan string {
 	changes := make(chan string)
 	go func() {
 		for path := range pathChanges {
-			if strings.HasSuffix(path, ".analysis") {
+			if analysis.IsAnalysisFile(path) {
 				changes <- path
 			}
 		}
