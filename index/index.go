@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/edma2/pantsindex/analysis"
 	"github.com/edma2/pantsindex/watch"
@@ -12,6 +13,7 @@ import (
 type Index struct {
 	m    map[string]string
 	stop chan bool
+	sync.Mutex
 }
 
 func NewIndex() *Index {
@@ -19,6 +21,13 @@ func NewIndex() *Index {
 		stop: make(chan bool),
 		m:    make(map[string]string),
 	}
+}
+
+func (idx *Index) Get(class string) string {
+	idx.Lock()
+	path := idx.m[class]
+	idx.Unlock()
+	return path
 }
 
 func (idx *Index) Watch(path string) {
@@ -30,8 +39,9 @@ func (idx *Index) Watch(path string) {
 	analysisChanges := watch.AnalysisChanges(analysisFileChanges)
 	go func() {
 		for change := range analysisChanges {
-			// TODO: mutex
+			idx.Lock()
 			idx.m[change.Class] = change.Path
+			idx.Unlock()
 		}
 	}()
 }
