@@ -29,9 +29,11 @@ func main() {
 	stop := make(chan bool)
 	pathChanges := watch.PathChanges(analysis.PantsRoot+"/.pants.d/compile/zinc/", stop)
 	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
+	analysisChanges := watch.AnalysisChanges(analysisFileChanges)
+
 	go func() {
-		for path := range analysisFileChanges {
-			fmt.Println(path)
+		for change := range analysisChanges {
+			fmt.Printf("%s -> %s\n", change.Class, change.Path)
 		}
 	}()
 	in := bufio.NewReader(os.Stdin)
