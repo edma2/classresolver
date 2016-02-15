@@ -1,6 +1,7 @@
 package watch
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -52,9 +53,12 @@ func AnalysisChanges(analysisFileChanges chan string) chan *SourceChange {
 	changes := make(chan *SourceChange)
 	go func() {
 		for path := range analysisFileChanges {
-			analysis.ReadAnalysisFile(path, func(class, path string) {
+			err := analysis.ReadAnalysisFile(path, func(class, path string) {
 				changes <- &SourceChange{Class: class, Path: path}
 			})
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}()
 	return changes
