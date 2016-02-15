@@ -10,10 +10,11 @@ import (
 
 func main() {
 	stop := make(chan bool)
-	paths := watch.PathChanges("/Users/ema/src/source/.pants.d/compile/zinc/", stop)
+	pathChanges := watch.PathChanges("/Users/ema/src/source/.pants.d/compile/zinc/", stop)
+	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
 	go func() {
-		for p := range paths {
-			fmt.Println(p)
+		for path := range analysisFileChanges {
+			fmt.Println(path)
 		}
 	}()
 	in := bufio.NewReader(os.Stdin)
