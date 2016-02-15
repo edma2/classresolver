@@ -19,6 +19,18 @@ var (
 	PantsRoot string
 )
 
+func IsAnalysisFile(path string) bool {
+	return strings.HasSuffix(path, ".analysis") && isRegularFile(path)
+}
+
+func isRegularFile(path string) bool {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return fi.Mode().IsRegular()
+}
+
 func ReadAnalysisFile(path string, emit func(string, string)) error {
 	log.Println("reading" + path)
 	return withReader(path, func(r *bufio.Reader) error {
