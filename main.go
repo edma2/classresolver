@@ -3,11 +3,11 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"os"
+	"path"
 
 	"github.com/edma2/pantsindex/analysis"
-	"github.com/edma2/pantsindex/watch"
+	"github.com/edma2/pantsindex/index"
 )
 
 var (
@@ -26,17 +26,11 @@ func main() {
 		analysis.PantsRoot = *pantsRootFlag
 	}
 
-	stop := make(chan bool)
-	pathChanges := watch.PathChanges(analysis.PantsRoot+"/.pants.d/compile/zinc/", stop)
-	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
-	analysisChanges := watch.AnalysisChanges(analysisFileChanges)
+	idx := index.NewIndex()
+	idx.Watch(path.Join(analysis.PantsRoot, ".pants.d", "compile", "zinc"))
 
-	go func() {
-		for change := range analysisChanges {
-			fmt.Printf("%s -> %s\n", change.Class, change.Path)
-		}
-	}()
 	in := bufio.NewReader(os.Stdin)
 	in.ReadString('\n')
-	stop <- true
+
+	idx.Stop()
 }
