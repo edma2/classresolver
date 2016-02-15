@@ -4,8 +4,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/edma2/pantsindex/analysis"
 	"github.com/go-fsnotify/fsevents"
 )
+
+type SourceChange struct {
+	Class string
+	Path  string
+}
 
 func PathChanges(path string, stop chan bool) chan string {
 	es := &fsevents.EventStream{
@@ -37,6 +43,18 @@ func AnalysisFileChanges(pathChanges chan string) chan string {
 			if strings.HasSuffix(path, ".analysis") {
 				changes <- path
 			}
+		}
+	}()
+	return changes
+}
+
+func AnalysisChanges(analysisFileChanges chan string) chan *SourceChange {
+	changes := make(chan *SourceChange)
+	go func() {
+		for path := range analysisFileChanges {
+			analysis.ReadAnalysisFile(path, func(class, path string) {
+				changes <- &SourceChange{Class: class, Path: path}
+			})
 		}
 	}()
 	return changes
