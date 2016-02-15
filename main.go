@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"os"
 	"path"
 
@@ -19,8 +20,13 @@ func main() {
 	idx := index.NewIndex()
 	idx.Watch(path.Join(*root, ".pants.d", "compile", "zinc"))
 
-	in := bufio.NewReader(os.Stdin)
-	in.ReadString('\n')
-
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		text := scanner.Text()
+		if text == "stop" {
+			break
+		}
+		fmt.Println(idx.Get(text))
+	}
 	idx.Stop()
 }
