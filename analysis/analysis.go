@@ -15,8 +15,6 @@ import (
 var (
 	itemCountRegexp      = regexp.MustCompile(`^([0-9]+) items$`)
 	protobufSourceRegexp = regexp.MustCompile(`^// source: (.*)$`)
-
-	PantsRoot string
 )
 
 func IsAnalysisFile(path string) bool {
@@ -95,8 +93,12 @@ func readClassNames(r *bufio.Reader, emit func(string, string)) error {
 		path, class := parseMapping(l)
 
 		if strings.Contains(path, "/.pants.d/gen/protoc/") {
-			if protoPath := resolveProtobufPath(path); protoPath != "" {
-				path = protoPath
+			if root := pantsRoot(path); root != "" {
+				if protoPath := resolveProtobufPath(root, path); protoPath != "" {
+					path = protoPath
+				}
+			} else {
+				log.Println("Could not find pants root!")
 			}
 		}
 		emit(class, path)
@@ -116,7 +118,17 @@ func parseMapping(line string) (string, string) {
 	return strings.TrimSpace(split[0]), strings.TrimSpace(split[2])
 }
 
-func resolveProtobufPath(genPath string) string {
+func pantsRoot(name string) string {
+	if name == "" || name == "/" {
+		return ""
+	}
+	if isRegularFile(path.Join(name, "pants")) {
+		return name
+	}
+	return pantsRoot(path.Dir(name))
+}
+
+func resolveProtobufPath(pantsRoot, genPath string) string {
 	var protoPath string
 	err := withReader(genPath, func(r *bufio.Reader) error {
 		for {
@@ -131,7 +143,7 @@ func resolveProtobufPath(genPath string) string {
 			matches := protobufSourceRegexp.FindStringSubmatch(line)
 
 			if len(matches) == 2 {
-				protoPath = path.Join(PantsRoot, "science/src/protobuf", matches[1])
+				protoPath = path.Join(pantsRoot, "science/src/protobuf", matches[1])
 				break
 			}
 		}
