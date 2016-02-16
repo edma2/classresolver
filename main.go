@@ -5,7 +5,6 @@ import (
 	"flag"
 	"io"
 	"log"
-	"os/exec"
 	"path"
 	"strings"
 
@@ -20,6 +19,11 @@ var (
 )
 
 func servePlumber(idx *index.Index, r io.ByteReader) {
+	send, err := plumb.Open("send", plan9.OWRITE)
+	if err != nil {
+		log.Fatalf("error opening plumb/send: %s\n", err)
+	}
+	defer send.Close()
 	for {
 		m := plumb.Message{}
 		err := m.Recv(r)
@@ -35,18 +39,15 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 			}
 		}
 		if path != "" {
-			plumbEdit(path)
+			m.Src = "pantsindex"
+			m.Dst = ""
+			m.Data = []byte(path)
+			if err := m.Send(send); err != nil {
+				log.Printf("send error: %s\n", err)
+			}
 		} else {
 			log.Println("couldn't find " + class)
 		}
-	}
-}
-
-// TODO: don't spawn external process
-func plumbEdit(path string) {
-	out, err := exec.Command("plumb", "-d", "edit", path).CombinedOutput()
-	if err != nil {
-		log.Fatalf("plumb: %v\n%s", err, out)
 	}
 }
 
