@@ -60,9 +60,17 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 			m.Src = "pantsindex"
 			m.Dst = ""
 			m.Data = []byte(path)
-			if leafName := leafOf(class); leafName != "" {
-				addr := fmt.Sprintf("/(trait|class|object|interface)[ 	]*%s/", leafName)
-				m.Attr = &plumb.Attribute{Name: "addr", Value: addr}
+			var attr *plumb.Attribute
+			for attr = m.Attr; attr != nil; attr = attr.Next {
+				if attr.Name == "addr" {
+					break
+				}
+			}
+			if attr == nil {
+				if leafName := leafOf(class); leafName != "" {
+					addr := fmt.Sprintf("/(trait|class|object|interface)[ 	]*%s/", leafName)
+					m.Attr = &plumb.Attribute{Name: "addr", Value: addr, Next: m.Attr}
+				}
 			}
 			if err := m.Send(send); err != nil {
 				log.Printf("send error: %s\n", err)
