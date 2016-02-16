@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"path"
+	"sort"
 	"strings"
 
 	"9fans.net/go/plan9"
@@ -18,6 +19,23 @@ import (
 var (
 	root = flag.String("root", "/Users/ema/src/source/", "pants root directory")
 )
+
+func leafOf(class string) string {
+	if i := strings.LastIndexByte(class, '.'); i != -1 && i+1 <= len(class) {
+		return class[i+1:]
+	}
+	return ""
+}
+
+func candidatesOf(class string) []string {
+	candidates := []string{}
+	elems := strings.Split(class, ".")
+	for i, _ := range elems {
+		candidates = append(candidates, strings.Join(elems[0:i+1], "."))
+	}
+	sort.Sort(sort.Reverse(sort.StringSlice(candidates)))
+	return candidates
+}
 
 func servePlumber(idx *index.Index, r io.ByteReader) {
 	send, err := plumb.Open("send", plan9.OWRITE)
@@ -32,19 +50,17 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 			log.Printf("recv error: %s\n", err)
 		}
 		class := string(m.Data)
-		path := idx.Get(class)
-		if path == "" {
-			// a.b.c -> a.b.$c
-			if i := strings.LastIndexByte(class, '.'); i != -1 {
-				path = idx.Get(class[0:i] + "$" + class[i+1:])
+		path := ""
+		for _, c := range candidatesOf(class) {
+			if path = idx.Get(c); path != "" {
+				break
 			}
 		}
 		if path != "" {
 			m.Src = "pantsindex"
 			m.Dst = ""
 			m.Data = []byte(path)
-			if i := strings.LastIndexByte(class, '.'); i != -1 {
-				leafName := class[i+1:]
+			if leafName := leafOf(class); leafName != "" {
 				addr := fmt.Sprintf("/(trait|class|object|interface)[ 	]*%s/", leafName)
 				m.Attr = &plumb.Attribute{Name: "addr", Value: addr}
 			}
