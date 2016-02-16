@@ -24,7 +24,7 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 		m := plumb.Message{}
 		err := m.Recv(r)
 		if err != nil {
-			log.Println(err)
+			log.Printf("recv error: %s\n", err)
 		}
 		class := string(m.Data)
 		path := idx.Get(class)
@@ -54,7 +54,7 @@ func main() {
 	flag.Parse()
 	plumber, err := plumb.Open("pantsindex", plan9.OREAD)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error opening plumb/pantsindex: %s\n", err)
 	}
 	defer plumber.Close()
 
