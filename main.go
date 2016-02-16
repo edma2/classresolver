@@ -45,7 +45,7 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 			m.Data = []byte(path)
 			if i := strings.LastIndexByte(class, '.'); i != -1 {
 				leafName := class[i+1:]
-				addr := fmt.Sprintf("/(trait|class|object) %s/", leafName)
+				addr := fmt.Sprintf("/(trait|class|object|interface) %s/", leafName)
 				m.Attr = &plumb.Attribute{Name: "addr", Value: addr}
 			}
 			if err := m.Send(send); err != nil {
