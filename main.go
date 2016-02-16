@@ -7,6 +7,7 @@ import (
 	"log"
 	"os/exec"
 	"path"
+	"strings"
 
 	"9fans.net/go/plan9"
 	"9fans.net/go/plumb"
@@ -25,10 +26,23 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 		if err != nil {
 			log.Println(err)
 		}
-		plumbEdit(idx.Get(string(m.Data)))
+		class := string(m.Data)
+		path := idx.Get(class)
+		if path == "" {
+			// a.b.c -> a.b.$c
+			if i := strings.LastIndexByte(class, '.'); i != -1 {
+				path = idx.Get(class[0:i] + "$" + class[i+1:])
+			}
+		}
+		if path != "" {
+			plumbEdit(path)
+		} else {
+			log.Println("couldn't find " + class)
+		}
 	}
 }
 
+// TODO: don't spawn external process
 func plumbEdit(path string) {
 	out, err := exec.Command("plumb", "-d", "edit", path).CombinedOutput()
 	if err != nil {
