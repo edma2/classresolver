@@ -69,7 +69,7 @@ func newWin(title string) (*acme.Win, error) {
 }
 
 func openWin(name string, childNames []string) {
-	w, err := newWin("/pantsindex/" + name)
+	w, err := newWin("/zinc/" + name)
 	if err != nil {
 		log.Printf("acme win: %s\n", err)
 	}
