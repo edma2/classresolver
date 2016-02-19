@@ -26,10 +26,10 @@ func TestLookup(t *testing.T) {
 	root.Insert("com.twitter.util.Future", "/a/b/c")
 	root.Insert("com.twitter.finagle.Addr", "x")
 	root.Insert("com.twitter.util", "/a/b/c")
-	if root.Lookup("com.twitter.finagle.Addr") != "x" {
+	if root.Lookup("com.twitter.finagle.Addr").path != "x" {
 		t.Error("Expected x")
 	}
-	if root.Lookup("com.twitter.bar.Addr") != "" {
-		t.Error("Expected empty string")
+	if root.Lookup("com.twitter.bar.Addr") != nil {
+		t.Error("Expected nil")
 	}
 }

@@ -32,18 +32,18 @@ func (n *Node) insert(name []string, path string) {
 	k.insert(name[1:], path)
 }
 
-func (n *Node) Lookup(name string) string {
+func (n *Node) Lookup(name string) *Node {
 	return n.lookup(strings.Split(name, "."))
 }
 
-func (n *Node) lookup(name []string) string {
+func (n *Node) lookup(name []string) *Node {
 	if len(name) == 0 {
-		return n.path
+		return n
 	}
 	if k, ok := n.kids[name[0]]; ok {
 		return k.lookup(name[1:])
 	}
-	return ""
+	return nil
 }
 
 func (n *Node) String() string {
