@@ -3,6 +3,7 @@ package index
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 type Node struct {
@@ -10,7 +11,11 @@ type Node struct {
 	path string
 }
 
-func (n *Node) Insert(name []string, path string) {
+func (n *Node) Insert(name string, path string) {
+	n.insert(strings.Split(name, "."), path)
+}
+
+func (n *Node) insert(name []string, path string) {
 	if len(name) == 0 {
 		n.path = path
 		return
@@ -24,15 +29,19 @@ func (n *Node) Insert(name []string, path string) {
 		k = new(Node)
 		n.kids[name[0]] = k
 	}
-	k.Insert(name[1:], path)
+	k.insert(name[1:], path)
 }
 
-func (n *Node) Lookup(name []string) string {
+func (n *Node) Lookup(name string) string {
+	return n.lookup(strings.Split(name, "."))
+}
+
+func (n *Node) lookup(name []string) string {
 	if len(name) == 0 {
 		return n.path
 	}
 	if k, ok := n.kids[name[0]]; ok {
-		return k.Lookup(name[1:])
+		return k.lookup(name[1:])
 	}
 	return ""
 }

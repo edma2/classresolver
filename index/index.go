@@ -11,7 +11,7 @@ import (
 )
 
 type Index struct {
-	m    map[string]string
+	tree *Node
 	stop chan bool
 	sync.Mutex
 }
@@ -19,13 +19,13 @@ type Index struct {
 func NewIndex() *Index {
 	return &Index{
 		stop: make(chan bool),
-		m:    make(map[string]string),
+		tree: new(Node),
 	}
 }
 
 func (idx *Index) Get(class string) string {
 	idx.Lock()
-	path := idx.m[class]
+	path := idx.tree.Lookup(class)
 	idx.Unlock()
 	return path
 }
@@ -40,7 +40,7 @@ func (idx *Index) Watch(path string) {
 	go func() {
 		for change := range analysisChanges {
 			idx.Lock()
-			idx.m[change.Class] = change.Path
+			idx.tree.Insert(change.Class, change.Path)
 			idx.Unlock()
 		}
 	}()
@@ -50,7 +50,7 @@ func readAnalysisFiles(idx *Index, path string) error {
 	return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if analysis.IsAnalysisFile(path) {
 			return analysis.ReadAnalysisFile(path, func(class, path string) {
-				idx.m[class] = path
+				idx.tree.Insert(class, path)
 			})
 		}
 		return nil
