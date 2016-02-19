@@ -20,3 +20,16 @@ func TestInsert(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestLookup(t *testing.T) {
+	root := new(Node)
+	root.Insert([]string{"com", "twitter", "util", "Future"}, "/a/b/c")
+	root.Insert([]string{"com", "twitter", "finagle", "Addr"}, "x")
+	root.Insert([]string{"com", "twitter", "util"}, "/a/b/c")
+	if root.Lookup([]string{"com", "twitter", "finagle", "Addr"}) != "x" {
+		t.Error("Expected x")
+	}
+	if root.Lookup([]string{"com", "twitter", "bar", "Addr"}) != "" {
+		t.Error("Expected empty string")
+	}
+}

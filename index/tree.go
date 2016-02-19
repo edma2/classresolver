@@ -27,6 +27,16 @@ func (n *Node) Insert(name []string, path string) {
 	k.Insert(name[1:], path)
 }
 
+func (n *Node) Lookup(name []string) string {
+	if len(name) == 0 {
+		return n.path
+	}
+	if k, ok := n.kids[name[0]]; ok {
+		return k.Lookup(name[1:])
+	}
+	return ""
+}
+
 func (n *Node) String() string {
 	return n.string(0)
 }
