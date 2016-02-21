@@ -128,7 +128,7 @@ func Main() error {
 		paths = flag.Args()
 	}
 	if len(paths) == 0 {
-		return fmt.Errorf("no paths to watch")
+		return nil
 	}
 	for _, path := range paths {
 		log.Println("Watching " + path)
