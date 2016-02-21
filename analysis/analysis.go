@@ -14,6 +14,7 @@ import (
 )
 
 var verbose = flag.Bool("v", false, "logging verbosity")
+var protobufRootDir = flag.String("protobufs", "", "root directory of protobuf sources")
 
 var (
 	itemCountRegexp      = regexp.MustCompile(`^([0-9]+) items$`)
@@ -96,14 +97,9 @@ func readClassNames(r *bufio.Reader, emit func(string, string)) error {
 			return err
 		}
 		path, class := parseMapping(l)
-
-		if strings.Contains(path, "/.pants.d/gen/protoc/") {
-			if root := pantsRoot(path); root != "" {
-				if protoPath := resolveProtobufPath(root, path); protoPath != "" {
-					path = protoPath
-				}
-			} else {
-				log.Println("Could not find pants root!")
+		if strings.Contains(path, "/protoc/") && *protobufRootDir != "" {
+			if protobufPath := resolveProtobufPath(path); protobufPath != "" {
+				path = protobufPath
 			}
 		}
 		emit(class, path)
@@ -123,23 +119,13 @@ func parseMapping(line string) (string, string) {
 	return strings.TrimSpace(split[0]), strings.TrimSpace(split[2])
 }
 
-func pantsRoot(name string) string {
-	if name == "" || name == "/" {
-		return ""
-	}
-	if isRegularFile(path.Join(name, "pants")) {
-		return name
-	}
-	return pantsRoot(path.Dir(name))
-}
-
-func resolveProtobufPath(pantsRoot, genPath string) string {
-	var protoPath string
+func resolveProtobufPath(genPath string) string {
+	var protobufPath string
 	err := withReader(genPath, func(r *bufio.Reader) error {
 		for {
 			line, err := readLine(r)
 			if err == io.EOF {
-				// This shouldn't happen?
+				// we reached the end of the file without finding "source: " line, give up
 				break
 			}
 			if err != nil {
@@ -148,7 +134,7 @@ func resolveProtobufPath(pantsRoot, genPath string) string {
 			matches := protobufSourceRegexp.FindStringSubmatch(line)
 
 			if len(matches) == 2 {
-				protoPath = path.Join(pantsRoot, "science/src/protobuf", matches[1])
+				protobufPath = path.Join(*protobufRootDir, matches[1])
 				break
 			}
 		}
@@ -157,6 +143,6 @@ func resolveProtobufPath(pantsRoot, genPath string) string {
 	if err != nil {
 		return ""
 	} else {
-		return protoPath
+		return protobufPath
 	}
 }
