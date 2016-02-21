@@ -3,6 +3,7 @@ package analysis
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"io"
 	"log"
 	"os"
@@ -11,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+var verbose = flag.Bool("v", false, "logging verbosity")
 
 var (
 	itemCountRegexp      = regexp.MustCompile(`^([0-9]+) items$`)
@@ -30,7 +33,9 @@ func isRegularFile(path string) bool {
 }
 
 func ReadAnalysisFile(path string, emit func(string, string)) error {
-	log.Println("reading " + path)
+	if *verbose {
+		log.Println("reading " + path)
+	}
 	return withReader(path, func(r *bufio.Reader) error {
 		if err := readUntil(r, "class names:"); err != nil {
 			return err
