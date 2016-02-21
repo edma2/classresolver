@@ -4,29 +4,13 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/edma2/classresolver/index"
-	"github.com/edma2/classresolver/zinc/fsevents"
 	"github.com/edma2/classresolver/zinc/parsing"
 )
 
-func Watch(root string) chan *index.Update {
-	paths := make(chan string)
-	go func() {
-		// TODO: handle walk errors
-		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			paths <- path
-			return nil
-		})
-		for path := range fsevents.Watch(root) {
-			paths <- path
-		}
-	}()
+func Watch(paths chan string) chan *index.Update {
 	return analysisChanges(analysisFileChanges(paths))
 }
 
