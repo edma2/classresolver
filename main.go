@@ -14,7 +14,7 @@ import (
 	"9fans.net/go/plan9"
 	"9fans.net/go/plumb"
 
-	"github.com/edma2/zindex/index"
+	"github.com/edma2/zincindexd/index"
 )
 
 var (
@@ -39,7 +39,7 @@ func candidatesOf(name string) []string {
 }
 
 func plumbFile(m *plumb.Message, send io.Writer, name, path string) {
-	m.Src = "zindex"
+	m.Src = "zincindexd"
 	m.Dst = ""
 	m.Data = []byte(path)
 	var attr *plumb.Attribute
@@ -117,9 +117,9 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 
 func main() {
 	flag.Parse()
-	plumber, err := plumb.Open("zindex", plan9.OREAD)
+	plumber, err := plumb.Open("zincindexd", plan9.OREAD)
 	if err != nil {
-		log.Fatalf("error opening plumb/zindex: %s\n", err)
+		log.Fatalf("error opening plumb/zincindexd: %s\n", err)
 	}
 	defer plumber.Close()
 

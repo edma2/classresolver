@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/edma2/zindex/analysis"
+	"github.com/edma2/zincindexd/analysis"
 	"github.com/go-fsnotify/fsevents"
 )
 
