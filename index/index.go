@@ -1,7 +1,6 @@
 package index
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -51,9 +50,9 @@ func (idx *Index) Get(name string) *GetResult {
 	return get
 }
 
-func (idx *Index) Watch(path string) {
+func (idx *Index) Watch(path string) error {
 	if err := readAnalysisFiles(idx, path); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	pathChanges := watch.PathChanges(path, idx.stop)
 	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
@@ -65,10 +64,14 @@ func (idx *Index) Watch(path string) {
 			idx.Unlock()
 		}
 	}()
+	return nil
 }
 
 func readAnalysisFiles(idx *Index, path string) error {
 	return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if analysis.IsAnalysisFile(path) {
 			return analysis.ReadAnalysisFile(path, func(class, path string) {
 				idx.tree.Insert(class, path)

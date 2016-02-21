@@ -111,11 +111,11 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 	}
 }
 
-func main() {
+func Main() error {
 	flag.Parse()
 	plumber, err := plumb.Open("zincindexd", plan9.OREAD)
 	if err != nil {
-		log.Fatalf("error opening plumb/zincindexd: %s\n", err)
+		return err
 	}
 	defer plumber.Close()
 	var paths []string
@@ -128,16 +128,24 @@ func main() {
 		paths = flag.Args()
 	}
 	if len(paths) == 0 {
-		log.Fatal("No paths to watch!")
-		return
+		return fmt.Errorf("no paths to watch")
 	}
 	for _, path := range paths {
 		log.Println("Watching " + path)
 	}
 	idx := index.NewIndex()
+	defer idx.Stop()
 	for _, path := range paths {
-		idx.Watch(path)
+		if err := idx.Watch(path); err != nil {
+			return err
+		}
 	}
 	servePlumber(idx, bufio.NewReader(plumber))
-	idx.Stop() // not reached
+	return nil
+}
+
+func main() {
+	if err := Main(); err != nil {
+		log.Fatal(err)
+	}
 }
