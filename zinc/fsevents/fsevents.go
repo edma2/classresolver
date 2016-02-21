@@ -1,6 +1,8 @@
 package fsevents
 
 import (
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/go-fsnotify/fsevents"
@@ -14,6 +16,14 @@ func Watch(root string) chan string {
 	es.Start()
 	paths := make(chan string)
 	go func() {
+		// TODO: handle walk errors
+		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			paths <- path
+			return nil
+		})
 		for events := range es.Events {
 			for _, event := range events {
 				paths <- event.Path
