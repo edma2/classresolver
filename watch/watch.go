@@ -56,7 +56,7 @@ func AnalysisChanges(analysisFileChanges chan string) chan *SourceChange {
 				changes <- &SourceChange{Class: class, Path: path}
 			})
 			if err != nil {
-				log.Printf("error reading analysis file: %s\n", err)
+				log.Printf("error reading %s: %s\n", path, err)
 			}
 		}
 	}()
