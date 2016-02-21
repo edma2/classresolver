@@ -66,7 +66,7 @@ func serve(idx *index.Index) error {
 		m := plumb.Message{}
 		err := m.Recv(r)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		name := string(m.Data)
 		var get *index.GetResult
