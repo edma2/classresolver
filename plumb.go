@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"sort"
 	"strings"
 
@@ -65,7 +66,7 @@ func serve(idx *index.Index) error {
 		m := plumb.Message{}
 		err := m.Recv(r)
 		if err != nil {
-			return err
+			log.Println(err)
 		}
 		name := string(m.Data)
 		var get *index.GetResult
@@ -79,12 +80,12 @@ func serve(idx *index.Index) error {
 		}
 		if get.Path != "" {
 			if err := plumbFile(&m, w, name, get.Path); err != nil {
-				return err
+				log.Println(err)
 			}
 		}
 		if get.Children != nil {
 			if err := openWin(name, get.Children); err != nil {
-				return err
+				log.Println(err)
 			}
 		}
 	}
