@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"path"
+	"os"
 	"sort"
 	"strings"
 
@@ -15,10 +15,6 @@ import (
 	"9fans.net/go/plumb"
 
 	"github.com/edma2/zincindexd/index"
-)
-
-var (
-	root = flag.String("root", "/Users/ema/src/source/", "pants root directory")
 )
 
 func leafOf(name string) string {
@@ -122,9 +118,26 @@ func main() {
 		log.Fatalf("error opening plumb/zincindexd: %s\n", err)
 	}
 	defer plumber.Close()
-
+	var paths []string
+	if len(flag.Args()) == 0 {
+		s := os.Getenv("ANALYSISPATH")
+		if s != "" {
+			paths = strings.Split(s, ":")
+		}
+	} else {
+		paths = flag.Args()
+	}
+	if len(paths) == 0 {
+		log.Fatal("No paths to watch!")
+		return
+	}
+	for _, path := range paths {
+		log.Println("Watching " + path)
+	}
 	idx := index.NewIndex()
-	idx.Watch(path.Join(*root, ".pants.d", "compile", "zinc"))
+	for _, path := range paths {
+		idx.Watch(path)
+	}
 	servePlumber(idx, bufio.NewReader(plumber))
 	idx.Stop() // not reached
 }
