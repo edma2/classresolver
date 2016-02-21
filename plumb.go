@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"sort"
 	"strings"
 
@@ -31,7 +30,7 @@ func candidatesOf(name string) []string {
 	return candidates
 }
 
-func plumbFile(m *plumb.Message, send io.Writer, name, path string) {
+func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
 	m.Src = "zincindexd"
 	m.Dst = ""
 	m.Data = []byte(path)
@@ -47,28 +46,26 @@ func plumbFile(m *plumb.Message, send io.Writer, name, path string) {
 			m.Attr = &plumb.Attribute{Name: "addr", Value: addr, Next: m.Attr}
 		}
 	}
-	if err := m.Send(send); err != nil {
-		log.Printf("send error: %s\n", err)
-	}
+	return m.Send(w)
 }
 
 func serve(idx *index.Index) error {
-	recv, err := plumb.Open("zincindexd", plan9.OREAD)
+	fid, err := plumb.Open("zincindexd", plan9.OREAD)
 	if err != nil {
 		return err
 	}
-	defer recv.Close()
-	r := bufio.NewReader(recv)
-	send, err := plumb.Open("send", plan9.OWRITE)
+	defer fid.Close()
+	r := bufio.NewReader(fid)
+	w, err := plumb.Open("send", plan9.OWRITE)
 	if err != nil {
 		return err
 	}
-	defer send.Close()
+	defer w.Close()
 	for {
 		m := plumb.Message{}
 		err := m.Recv(r)
 		if err != nil {
-			log.Printf("recv error: %s\n", err)
+			return err
 		}
 		name := string(m.Data)
 		var get *index.GetResult
@@ -78,14 +75,17 @@ func serve(idx *index.Index) error {
 			}
 		}
 		if get == nil {
-			log.Println("couldn't find " + name)
 			continue
 		}
 		if get.Path != "" {
-			plumbFile(&m, send, name, get.Path)
+			if err := plumbFile(&m, w, name, get.Path); err != nil {
+				return err
+			}
 		}
 		if get.Children != nil {
-			openWin(name, get.Children)
+			if err := openWin(name, get.Children); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strings"
 
 	"9fans.net/go/acme"
@@ -16,12 +15,12 @@ func newWin(title string) (*acme.Win, error) {
 	return win, nil
 }
 
-func openWin(name string, childNames []string) {
+func openWin(name string, names []string) error {
 	w, err := newWin("/zinc/" + name)
 	if err != nil {
-		log.Printf("acme win: %s\n", err)
+		return err
 	}
-	for _, name := range childNames {
+	for _, name := range names {
 		if !strings.ContainsRune(name, '$') {
 			w.Fprintf("body", "%s\n", name)
 		}
@@ -29,4 +28,5 @@ func openWin(name string, childNames []string) {
 	w.Ctl("clean")
 	w.Addr("#0")
 	w.Ctl("show")
+	return nil
 }
