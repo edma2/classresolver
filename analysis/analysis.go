@@ -21,12 +21,14 @@ var (
 	protobufSourceRegexp = regexp.MustCompile(`^// source: (.*)$`)
 )
 
-func IsAnalysisFile(path string) bool {
-	return strings.HasSuffix(path, ".analysis") && isRegularFile(path)
+func IsAnalysisFile(name string) bool {
+	return strings.HasPrefix(path.Base(name), "inc_compile_") ||
+		strings.HasSuffix(name, ".analysis") &&
+			isRegularFile(name)
 }
 
-func isRegularFile(path string) bool {
-	fi, err := os.Stat(path)
+func isRegularFile(name string) bool {
+	fi, err := os.Stat(name)
 	if err != nil {
 		return false
 	}
