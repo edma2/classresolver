@@ -1,18 +1,17 @@
 package index
 
 import (
-	"os"
-	"path/filepath"
 	"sort"
 	"sync"
-
-	"github.com/edma2/classresolver/analysis"
-	"github.com/edma2/classresolver/watch"
 )
 
+type Update struct {
+	Class string
+	Path  string
+}
+
 type Index struct {
-	tree  *Node
-	stops []chan bool
+	tree *Node
 	sync.Mutex
 }
 
@@ -23,8 +22,7 @@ type GetResult struct {
 
 func NewIndex() *Index {
 	return &Index{
-		stops: nil,
-		tree:  new(Node),
+		tree: new(Node),
 	}
 }
 
@@ -50,7 +48,7 @@ func (idx *Index) Get(name string) *GetResult {
 	return get
 }
 
-func (idx *Index) WatchUpdates(updates chan *watch.SourceChange) {
+func (idx *Index) Watch(updates chan *Update) error {
 	go func() {
 		for update := range updates {
 			idx.Lock()
@@ -58,37 +56,5 @@ func (idx *Index) WatchUpdates(updates chan *watch.SourceChange) {
 			idx.Unlock()
 		}
 	}()
-}
-
-func (idx *Index) Watch(path string) error {
-	if err := readAnalysisFiles(idx, path); err != nil {
-		return err
-	}
-	stop := make(chan bool)
-	idx.stops = append(idx.stops, stop)
-	pathChanges := watch.PathChanges(path, stop)
-	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
-	analysisChanges := watch.AnalysisChanges(analysisFileChanges)
-	idx.WatchUpdates(analysisChanges)
 	return nil
-}
-
-func readAnalysisFiles(idx *Index, path string) error {
-	return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if analysis.IsAnalysisFile(path) {
-			return analysis.ReadAnalysisFile(path, func(class, path string) {
-				idx.tree.Insert(class, path)
-			})
-		}
-		return nil
-	})
-}
-
-func (idx *Index) Stop() {
-	for _, stop := range idx.stops {
-		stop <- true
-	}
 }

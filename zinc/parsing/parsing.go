@@ -1,4 +1,4 @@
-package analysis
+package parsing
 
 import (
 	"bufio"
@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-var verbose = flag.Bool("v", false, "logging verbosity")
+var verbose = flag.Bool("v", false, "verbose logging")
 var protobufRootDir = flag.String("protobufs", "", "root directory of protobuf sources")
 
 var (
@@ -21,21 +21,7 @@ var (
 	protobufSourceRegexp = regexp.MustCompile(`^// source: (.*)$`)
 )
 
-func IsAnalysisFile(name string) bool {
-	return strings.HasPrefix(path.Base(name), "inc_compile_") ||
-		strings.HasSuffix(name, ".analysis") &&
-			isRegularFile(name)
-}
-
-func isRegularFile(name string) bool {
-	fi, err := os.Stat(name)
-	if err != nil {
-		return false
-	}
-	return fi.Mode().IsRegular()
-}
-
-func ReadAnalysisFile(path string, emit func(string, string)) error {
+func Parse(path string, emit func(string, string)) error {
 	if *verbose {
 		log.Println("reading " + path)
 	}

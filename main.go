@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/edma2/classresolver/index"
+	"github.com/edma2/classresolver/zinc"
 )
 
 func Main() error {
@@ -17,9 +18,8 @@ func Main() error {
 		log.Println("Watching " + path)
 	}
 	idx := index.NewIndex()
-	defer idx.Stop()
 	for _, path := range paths {
-		if err := idx.Watch(path); err != nil {
+		if err := idx.Watch(zinc.Watch(path)); err != nil {
 			return err
 		}
 	}
