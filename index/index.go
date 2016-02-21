@@ -50,6 +50,16 @@ func (idx *Index) Get(name string) *GetResult {
 	return get
 }
 
+func (idx *Index) WatchUpdates(updates chan *watch.SourceChange) {
+	go func() {
+		for update := range updates {
+			idx.Lock()
+			idx.tree.Insert(update.Class, update.Path)
+			idx.Unlock()
+		}
+	}()
+}
+
 func (idx *Index) Watch(path string) error {
 	if err := readAnalysisFiles(idx, path); err != nil {
 		return err
@@ -59,13 +69,7 @@ func (idx *Index) Watch(path string) error {
 	pathChanges := watch.PathChanges(path, stop)
 	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
 	analysisChanges := watch.AnalysisChanges(analysisFileChanges)
-	go func() {
-		for change := range analysisChanges {
-			idx.Lock()
-			idx.tree.Insert(change.Class, change.Path)
-			idx.Unlock()
-		}
-	}()
+	idx.WatchUpdates(analysisChanges)
 	return nil
 }
 
