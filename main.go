@@ -78,10 +78,16 @@ func openWin(name string, childNames []string) {
 	w.Ctl("show")
 }
 
-func servePlumber(idx *index.Index, r io.ByteReader) {
+func serve(idx *index.Index) error {
+	recv, err := plumb.Open("zincindexd", plan9.OREAD)
+	if err != nil {
+		return err
+	}
+	defer recv.Close()
+	r := bufio.NewReader(recv)
 	send, err := plumb.Open("send", plan9.OWRITE)
 	if err != nil {
-		log.Fatalf("error opening plumb/send: %s\n", err)
+		return err
 	}
 	defer send.Close()
 	for {
@@ -108,15 +114,11 @@ func servePlumber(idx *index.Index, r io.ByteReader) {
 			openWin(name, get.Children)
 		}
 	}
+	return nil
 }
 
 func Main() error {
 	flag.Parse()
-	plumber, err := plumb.Open("zincindexd", plan9.OREAD)
-	if err != nil {
-		return err
-	}
-	defer plumber.Close()
 	paths := flag.Args()
 	if len(paths) == 0 {
 		return nil
@@ -131,8 +133,7 @@ func Main() error {
 			return err
 		}
 	}
-	servePlumber(idx, bufio.NewReader(plumber))
-	return nil
+	return serve(idx)
 }
 
 func main() {
