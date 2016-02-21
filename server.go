@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/edma2/zincindexd/index"
+	"github.com/edma2/classresolver/index"
 
 	"9fans.net/go/plan9"
 	"9fans.net/go/plumb"
@@ -32,7 +32,7 @@ func candidatesOf(name string) []string {
 }
 
 func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
-	m.Src = "zincindexd"
+	m.Src = "classresolver"
 	m.Dst = ""
 	m.Data = []byte(path)
 	var attr *plumb.Attribute
@@ -51,7 +51,7 @@ func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
 }
 
 func serve(idx *index.Index) error {
-	fid, err := plumb.Open("zincindexd", plan9.OREAD)
+	fid, err := plumb.Open("classresolver", plan9.OREAD)
 	if err != nil {
 		return err
 	}

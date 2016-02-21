@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/edma2/zincindexd/index"
+	"github.com/edma2/classresolver/index"
 )
 
 func Main() error {

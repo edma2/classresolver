@@ -6,8 +6,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/edma2/zincindexd/analysis"
-	"github.com/edma2/zincindexd/watch"
+	"github.com/edma2/classresolver/analysis"
+	"github.com/edma2/classresolver/watch"
 )
 
 type Index struct {
