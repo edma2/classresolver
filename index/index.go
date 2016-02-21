@@ -7,8 +7,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/edma2/pantsindex/analysis"
-	"github.com/edma2/pantsindex/watch"
+	"github.com/edma2/zindex/analysis"
+	"github.com/edma2/zindex/watch"
 )
 
 type Index struct {
