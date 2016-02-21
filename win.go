@@ -16,7 +16,7 @@ func newWin(title string) (*acme.Win, error) {
 }
 
 func openWin(name string, names []string) error {
-	w, err := newWin("/zinc/" + name)
+	w, err := newWin("/class/" + name)
 	if err != nil {
 		return err
 	}
