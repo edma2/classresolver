@@ -11,8 +11,8 @@ import (
 )
 
 type Index struct {
-	tree *Node
-	stop chan bool
+	tree  *Node
+	stops []chan bool
 	sync.Mutex
 }
 
@@ -23,8 +23,8 @@ type GetResult struct {
 
 func NewIndex() *Index {
 	return &Index{
-		stop: make(chan bool),
-		tree: new(Node),
+		stops: nil,
+		tree:  new(Node),
 	}
 }
 
@@ -54,7 +54,9 @@ func (idx *Index) Watch(path string) error {
 	if err := readAnalysisFiles(idx, path); err != nil {
 		return err
 	}
-	pathChanges := watch.PathChanges(path, idx.stop)
+	stop := make(chan bool)
+	idx.stops = append(idx.stops, stop)
+	pathChanges := watch.PathChanges(path, stop)
 	analysisFileChanges := watch.AnalysisFileChanges(pathChanges)
 	analysisChanges := watch.AnalysisChanges(analysisFileChanges)
 	go func() {
@@ -82,5 +84,7 @@ func readAnalysisFiles(idx *Index, path string) error {
 }
 
 func (idx *Index) Stop() {
-	idx.stop <- true
+	for _, stop := range idx.stops {
+		stop <- true
+	}
 }
