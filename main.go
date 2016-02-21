@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"sort"
 	"strings"
 
@@ -118,15 +117,7 @@ func Main() error {
 		return err
 	}
 	defer plumber.Close()
-	var paths []string
-	if len(flag.Args()) == 0 {
-		s := os.Getenv("ANALYSISPATH")
-		if s != "" {
-			paths = strings.Split(s, ":")
-		}
-	} else {
-		paths = flag.Args()
-	}
+	paths := flag.Args()
 	if len(paths) == 0 {
 		return nil
 	}
