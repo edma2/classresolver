@@ -51,7 +51,7 @@ func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
 }
 
 func serve(idx *index.Index) error {
-	fid, err := plumb.Open("classedit", plan9.OREAD)
+	fid, err := plumb.Open("editclass", plan9.OREAD)
 	if err != nil {
 		return err
 	}
