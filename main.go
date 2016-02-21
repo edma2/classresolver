@@ -20,9 +20,7 @@ func Main() error {
 	}
 	idx := index.NewIndex()
 	for _, path := range paths {
-		if err := idx.Watch(zinc.Watch(fsevents.Watch(path))); err != nil {
-			return err
-		}
+		idx.Watch(zinc.Watch(fsevents.Watch(path)))
 	}
 	return serve(idx)
 }

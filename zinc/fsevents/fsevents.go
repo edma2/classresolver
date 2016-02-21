@@ -1,6 +1,7 @@
 package fsevents
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -16,10 +17,9 @@ func Watch(root string) chan string {
 	es.Start()
 	paths := make(chan string)
 	go func() {
-		// TODO: handle walk errors
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return err
+				log.Println(err)
 			}
 			paths <- path
 			return nil

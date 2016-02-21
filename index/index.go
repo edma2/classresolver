@@ -48,7 +48,7 @@ func (idx *Index) Get(name string) *GetResult {
 	return get
 }
 
-func (idx *Index) Watch(updates chan *Update) error {
+func (idx *Index) Watch(updates chan *Update) {
 	go func() {
 		for update := range updates {
 			idx.Lock()
@@ -56,5 +56,4 @@ func (idx *Index) Watch(updates chan *Update) error {
 			idx.Unlock()
 		}
 	}()
-	return nil
 }
