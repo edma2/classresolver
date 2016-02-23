@@ -80,7 +80,7 @@ func serve(idx *index.Index) error {
 		}
 		if get.Path != "" {
 			if err := plumbFile(&m, w, name, get.Path); err != nil {
-				log.Println(err)
+				log.Printf("%s: %s\n", get.Path, err)
 			}
 		}
 		if get.Children != nil {
