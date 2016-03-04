@@ -32,6 +32,7 @@ func candidatesOf(name string) []string {
 }
 
 func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
+	log.Printf("Received from plumber: %s\n", m)
 	m.Src = "classresolver"
 	m.Dst = ""
 	m.Data = []byte(path)
@@ -47,6 +48,7 @@ func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
 			m.Attr = &plumb.Attribute{Name: "addr", Value: addr, Next: m.Attr}
 		}
 	}
+	log.Printf("Sending to plumber: %s\n", m)
 	return m.Send(w)
 }
 
@@ -76,17 +78,19 @@ func serve(idx *index.Index) error {
 			}
 		}
 		if get == nil {
+			log.Printf("Found no results for: %s\n", name)
 			continue
 		}
 		if get.Path != "" {
 			if err := plumbFile(&m, w, name, get.Path); err != nil {
 				log.Printf("%s: %s\n", get.Path, err)
 			}
-		}
-		if get.Children != nil {
+		} else if get.Children != nil {
 			if err := openWin(name, get.Children); err != nil {
 				log.Println(err)
 			}
+		} else {
+			log.Printf("Result was empty: %s\n", name)
 		}
 	}
 	return nil
