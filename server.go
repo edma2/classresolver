@@ -32,7 +32,6 @@ func candidatesOf(name string) []string {
 }
 
 func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
-	log.Printf("Received from plumber: %s\n", m)
 	m.Src = "classresolver"
 	m.Dst = ""
 	m.Data = []byte(path)
@@ -70,6 +69,7 @@ func serve(idx *index.Index) error {
 		if err != nil {
 			return err
 		}
+		log.Printf("Received from plumber: %s\n", m)
 		name := string(m.Data)
 		var get *index.GetResult
 		for _, c := range candidatesOf(name) {
