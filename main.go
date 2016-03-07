@@ -101,6 +101,9 @@ func serve(idx *index.Index) error {
 		}
 		log.Printf("Received from plumber: %s\n", m)
 		name := string(m.Data)
+		if strings.HasPrefix(m.Dir, "/c/") {
+			name = strings.TrimPrefix(m.Dir, "/c/") + "." + name
+		}
 		var get *index.GetResult
 		for _, c := range candidatesOf(name) {
 			if get = idx.Get(c); get != nil {
