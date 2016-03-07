@@ -113,9 +113,10 @@ func serve(idx *index.Index) error {
 					w.Fprintf("body", "%s\n", name)
 				}
 			})
-			w.Ctl("clean")
-			w.Addr("#0")
+			w.Fprintf("addr", "#0")
+			w.Ctl("dot=addr")
 			w.Ctl("show")
+			w.Ctl("clean")
 		} else {
 			log.Printf("Result was empty: %s\n", name)
 		}
