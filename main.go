@@ -19,6 +19,42 @@ import (
 	"github.com/edma2/classy/zinc/fsevents"
 )
 
+func showChildren(idx *index.Index, name string) error {
+	var w *acme.Win = nil
+	var err error
+	title := "/c/" + name + "/"
+	infos, err := acme.Windows()
+	if err != nil {
+		return err
+	}
+	for _, info := range infos {
+		if info.Name == title {
+			w, err = acme.Open(info.ID, nil)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if w == nil {
+		w, err = newWin(title)
+		if err != nil {
+			return err
+		}
+	}
+	w.Addr(",")
+	w.Write("data", nil)
+	idx.Walk(name, func(name string) {
+		if !strings.ContainsRune(name, '$') {
+			w.Fprintf("body", "%s\n", name)
+		}
+	})
+	w.Fprintf("addr", "#0")
+	w.Ctl("dot=addr")
+	w.Ctl("show")
+	w.Ctl("clean")
+	return nil
+}
+
 func newWin(title string) (*acme.Win, error) {
 	win, err := acme.New()
 	if err != nil {
@@ -103,20 +139,9 @@ func serve(idx *index.Index) error {
 				log.Printf("%s: %s\n", get.Path, err)
 			}
 		} else if get.Children != nil {
-			w, err := newWin("/c/" + name + "/")
-			if err != nil {
+			if err := showChildren(idx, name); err != nil {
 				log.Printf("error opening win: %s\n", err)
-				continue
 			}
-			idx.Walk(get.Name, func(name string) {
-				if !strings.ContainsRune(name, '$') {
-					w.Fprintf("body", "%s\n", name)
-				}
-			})
-			w.Fprintf("addr", "#0")
-			w.Ctl("dot=addr")
-			w.Ctl("show")
-			w.Ctl("clean")
 		} else {
 			log.Printf("Result was empty: %s\n", name)
 		}
