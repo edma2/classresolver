@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/edma2/classresolver/index"
+	"github.com/edma2/classy/index"
 
 	"9fans.net/go/plan9"
 	"9fans.net/go/plumb"
@@ -32,7 +32,7 @@ func candidatesOf(name string) []string {
 }
 
 func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
-	m.Src = "classresolver"
+	m.Src = "classy"
 	m.Dst = ""
 	m.Data = []byte(path)
 	var attr *plumb.Attribute

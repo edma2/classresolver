@@ -4,9 +4,9 @@ import (
 	"flag"
 	"log"
 
-	"github.com/edma2/classresolver/index"
-	"github.com/edma2/classresolver/zinc"
-	"github.com/edma2/classresolver/zinc/fsevents"
+	"github.com/edma2/classy/index"
+	"github.com/edma2/classy/zinc"
+	"github.com/edma2/classy/zinc/fsevents"
 )
 
 func Main() error {
