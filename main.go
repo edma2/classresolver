@@ -19,6 +19,7 @@ import (
 	"github.com/edma2/classy/zinc/fsevents"
 )
 
+// TODO: add "loading" screen, buffer results
 func showChildren(idx *index.Index, name string) error {
 	var w *acme.Win = nil
 	var err error
@@ -40,14 +41,12 @@ func showChildren(idx *index.Index, name string) error {
 		if err != nil {
 			return err
 		}
+		idx.Walk(name, func(name string) {
+			if !strings.ContainsRune(name, '$') {
+				w.Fprintf("body", "%s\n", name)
+			}
+		})
 	}
-	w.Addr(",")
-	w.Write("data", nil)
-	idx.Walk(name, func(name string) {
-		if !strings.ContainsRune(name, '$') {
-			w.Fprintf("body", "%s\n", name)
-		}
-	})
 	w.Fprintf("addr", "#0")
 	w.Ctl("dot=addr")
 	w.Ctl("show")
