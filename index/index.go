@@ -16,6 +16,7 @@ type Index struct {
 }
 
 type GetResult struct {
+	Name     string
 	Children []string
 	Path     string
 }
@@ -26,6 +27,15 @@ func NewIndex() *Index {
 	}
 }
 
+func (idx *Index) Walk(name string, visit func(string)) {
+	idx.Lock()
+	root := idx.tree.Lookup(name)
+	if root != nil {
+		root.Walk(visit)
+	}
+	idx.Unlock()
+}
+
 func (idx *Index) Get(name string) *GetResult {
 	idx.Lock()
 	n := idx.tree.Lookup(name)
@@ -34,6 +44,7 @@ func (idx *Index) Get(name string) *GetResult {
 		return nil
 	}
 	get := new(GetResult)
+	get.Name = name
 	get.Path = n.path
 	if len(n.kids) == 0 {
 		return get

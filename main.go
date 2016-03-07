@@ -28,22 +28,6 @@ func newWin(title string) (*acme.Win, error) {
 	return win, nil
 }
 
-func openWin(name string, names []string) error {
-	w, err := newWin("/c/" + name + "/")
-	if err != nil {
-		return err
-	}
-	for _, name := range names {
-		if !strings.ContainsRune(name, '$') {
-			w.Fprintf("body", "%s\n", name)
-		}
-	}
-	w.Ctl("clean")
-	w.Addr("#0")
-	w.Ctl("show")
-	return nil
-}
-
 func leafOf(name string) string {
 	if i := strings.LastIndexByte(name, '.'); i != -1 && i+1 <= len(name) {
 		return name[i+1:]
@@ -119,9 +103,19 @@ func serve(idx *index.Index) error {
 				log.Printf("%s: %s\n", get.Path, err)
 			}
 		} else if get.Children != nil {
-			if err := openWin(name, get.Children); err != nil {
-				log.Println(err)
+			w, err := newWin("/c/" + name + "/")
+			if err != nil {
+				log.Printf("error opening win: %s\n", err)
+				continue
 			}
+			idx.Walk(get.Name, func(name string) {
+				if !strings.ContainsRune(name, '$') {
+					w.Fprintf("body", "%s\n", name)
+				}
+			})
+			w.Ctl("clean")
+			w.Addr("#0")
+			w.Ctl("show")
 		} else {
 			log.Printf("Result was empty: %s\n", name)
 		}

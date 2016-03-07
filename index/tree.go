@@ -32,6 +32,27 @@ func (n *Node) insert(name []string, path string) {
 	k.insert(name[1:], path)
 }
 
+func (n *Node) Walk(visit func(string)) {
+	n.walk("", visit)
+}
+
+func (n *Node) walk(prefix string, visit func(string)) {
+	sorted := make([]string, len(n.kids))
+	i := 0
+	for el, _ := range n.kids {
+		sorted[i] = el
+		i++
+	}
+	sort.Strings(sorted)
+	for _, el := range sorted {
+		// only visit leaves
+		if len(n.kids[el].kids) == 0 {
+			visit(prefix + el)
+		}
+		n.kids[el].walk(prefix+el+".", visit)
+	}
+}
+
 func (n *Node) Lookup(name string) *Node {
 	return n.lookup(strings.Split(name, "."))
 }
