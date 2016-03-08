@@ -51,8 +51,8 @@ func (idx *Index) Get(name string) *GetResult {
 	}
 	get.Children = make([]string, len(n.kids))
 	i := 0
-	for elem, _ := range n.kids {
-		get.Children[i] = elem
+	for el, _ := range n.kids {
+		get.Children[i] = name + "." + el
 		i++
 	}
 	sort.Strings(get.Children)
