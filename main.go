@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 
-	"9fans.net/go/acme"
 	"9fans.net/go/plan9"
 	"9fans.net/go/plumb"
 
@@ -54,15 +53,6 @@ func plumbDir1(dir string, w io.Writer) error {
 	}
 	log.Printf("Sending to plumber: %s\n", m)
 	return m.Send(w)
-}
-
-func newWin(title string) (*acme.Win, error) {
-	win, err := acme.New()
-	if err != nil {
-		return nil, err
-	}
-	win.Name(title)
-	return win, nil
 }
 
 func leafOf(name string) string {
