@@ -22,7 +22,7 @@ func plumbDir(idx *index.Index, children []string, w io.Writer) error {
 	dirs := make(map[string]int)
 	for _, c := range children {
 		if get := idx.Get(c); get != nil {
-			if get.Path != "" {
+			if get.Path != "" && !strings.Contains(get.Path, "/test/") {
 				dirs[filepath.Dir(get.Path)]++
 			}
 		}
