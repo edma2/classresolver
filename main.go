@@ -2,13 +2,13 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"log"
+	"path/filepath"
 	"sort"
 	"strings"
-
-	"flag"
 
 	"9fans.net/go/acme"
 	"9fans.net/go/plan9"
@@ -19,39 +19,41 @@ import (
 	"github.com/edma2/classy/zinc/fsevents"
 )
 
-// TODO: add "loading" screen, buffer results
-func showChildren(idx *index.Index, name string) error {
-	var w *acme.Win = nil
-	var err error
-	title := "/c/" + name + "/"
-	infos, err := acme.Windows()
-	if err != nil {
-		return err
-	}
-	for _, info := range infos {
-		if info.Name == title {
-			w, err = acme.Open(info.ID, nil)
-			if err != nil {
-				return err
+func plumbDir(idx *index.Index, children []string, w io.Writer) error {
+	dirs := make(map[string]int)
+	for _, c := range children {
+		if get := idx.Get(c); get != nil {
+			if get.Path != "" {
+				dirs[filepath.Dir(get.Path)]++
 			}
 		}
 	}
-	if w == nil {
-		w, err = newWin(title)
-		if err != nil {
-			return err
+	// guess dir to plumb by most common dir
+	max := 0
+	dir := ""
+	for d, n := range dirs {
+		if n > max {
+			max = n
+			dir = d
 		}
-		idx.Walk(name, func(name string) {
-			if !strings.ContainsRune(name, '$') {
-				w.Fprintf("body", "%s\n", name)
-			}
-		})
 	}
-	w.Fprintf("addr", "#0")
-	w.Ctl("dot=addr")
-	w.Ctl("show")
-	w.Ctl("clean")
-	return nil
+	log.Println(dirs)
+	log.Println(dir)
+	if dir == "" {
+		return nil
+	}
+	return plumbDir1(dir, w)
+}
+
+func plumbDir1(dir string, w io.Writer) error {
+	m := plumb.Message{
+		Src:  "classy",
+		Dst:  "edit",
+		Type: "text",
+		Data: []byte(dir),
+	}
+	log.Printf("Sending to plumber: %s\n", m)
+	return m.Send(w)
 }
 
 func newWin(title string) (*acme.Win, error) {
@@ -138,8 +140,8 @@ func serve(idx *index.Index) error {
 				log.Printf("%s: %s\n", get.Path, err)
 			}
 		} else if get.Children != nil {
-			if err := showChildren(idx, name); err != nil {
-				log.Printf("error opening win: %s\n", err)
+			if err := plumbDir(idx, get.Children, w); err != nil {
+				log.Printf("error opening dir: %s\n", err)
 			}
 		} else {
 			log.Printf("Result was empty: %s\n", name)
