@@ -90,10 +90,20 @@ func readClassNames(r *bufio.Reader, emit func(string, string)) error {
 				path = protobufPath
 			}
 		}
-		emit(class, path)
+		if isRegularFile(path) {
+			emit(class, path)
+		}
 	}
 
 	return nil
+}
+
+func isRegularFile(name string) bool {
+	fi, err := os.Stat(name)
+	if err != nil {
+		return false
+	}
+	return fi.Mode().IsRegular()
 }
 
 func readLine(r *bufio.Reader) (string, error) {
