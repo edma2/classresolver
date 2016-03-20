@@ -12,3 +12,7 @@ names and plumbing the appropriate source files to edit.
 classy's file watching implementation uses
 [FSEvents](https://en.wikipedia.org/wiki/FSEvents) as the underlying
 mechanism. This makes it an OSX-only tool.
+
+# Bugs
+- Cannot detect or evict "expired" entries. The only solution is to wipe out
+  generated Zinc analysis files and restart classy.
