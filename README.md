@@ -15,4 +15,5 @@ mechanism. This makes it an OSX-only tool.
 
 # Bugs
 - Cannot detect or evict "expired" entries. The only solution is to wipe out
-  generated Zinc analysis files and restart classy.
+  generated Zinc analysis files and restart classy. Rebuild index every N
+  minutes?
