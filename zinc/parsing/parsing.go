@@ -17,6 +17,7 @@ var verbose = flag.Bool("v", false, "verbose logging")
 var protobufRootDir = flag.String("protobufs", "", "root directory of protobuf sources")
 
 var (
+	classNamesRegexp	= regexp.MustCompile(`^class names:`)
 	itemCountRegexp      = regexp.MustCompile(`^([0-9]+) items$`)
 	protobufSourceRegexp = regexp.MustCompile(`^// source: (.*)$`)
 )
@@ -26,7 +27,7 @@ func Parse(path string, emit func(string, string)) error {
 		log.Println("reading " + path)
 	}
 	return withReader(path, func(r *bufio.Reader) error {
-		if err := readUntil(r, "class names:"); err != nil {
+		if err := readUntil(r, classNamesRegexp); err != nil {
 			return err
 		}
 		if err := readClassNames(r, emit); err != nil {
@@ -36,10 +37,10 @@ func Parse(path string, emit func(string, string)) error {
 	})
 }
 
-func readUntil(r *bufio.Reader, s string) error {
+func readUntil(r *bufio.Reader, p *regexp.Regexp) error {
 	for {
 		line, err := readLine(r)
-		if strings.Contains(line, s) {
+		if p.MatchString(line) {
 			break
 		}
 		if err != nil {
