@@ -6,8 +6,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/edma2/classy/index"
-	"github.com/edma2/classy/zinc/parsing"
+	"github.com/edma2/navigator/index"
+	"github.com/edma2/navigator/zinc/parsing"
 )
 
 func Watch(paths chan string) chan *index.Update {

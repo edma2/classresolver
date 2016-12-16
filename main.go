@@ -13,9 +13,9 @@ import (
 	"9fans.net/go/plan9"
 	"9fans.net/go/plumb"
 
-	"github.com/edma2/classy/index"
-	"github.com/edma2/classy/zinc"
-	"github.com/edma2/classy/zinc/fsevents"
+	"github.com/edma2/navigator/index"
+	"github.com/edma2/navigator/zinc"
+	"github.com/edma2/navigator/zinc/fsevents"
 )
 
 func plumbDir(idx *index.Index, children []string, w io.Writer) error {
@@ -46,7 +46,7 @@ func plumbDir(idx *index.Index, children []string, w io.Writer) error {
 
 func plumbDir1(dir string, w io.Writer) error {
 	m := plumb.Message{
-		Src:  "classy",
+		Src:  "navigator",
 		Dst:  "edit",
 		Type: "text",
 		Data: []byte(dir),
@@ -73,7 +73,7 @@ func candidatesOf(name string) []string {
 }
 
 func plumbFile(m *plumb.Message, w io.Writer, name, path string) error {
-	m.Src = "classy"
+	m.Src = "navigator"
 	m.Dst = ""
 	m.Data = []byte(path)
 	var attr *plumb.Attribute
